@@ -143,8 +143,28 @@ LIMIT 10 -- Y mostramos únicamente los 10 primeros
 	WHERE f."title" = 'EGG IGBY'
 	;
 	
+-- 18. Selecciona todos los nombres de las películas únicos.
+SELECT DISTINCT "title"
+FROM "film"
+;
+
+-- 19. Encuentra el título de las películas que son comedias y tienen una duración mayor a 180 minutos en la tabla “film”.
+SELECT "title"
+FROM "film" AS f
+	JOIN "film_category" AS fc -- Unimos con la tabla intermedia
+	ON f."film_id" = fc."film_id"
+	JOIN "category" AS c -- Para unir finalmente lña tabla que contiene los nombres de las categorías
+	ON fc."category_id" = c."category_id"
+WHERE "length" > 180 -- Incluimos las condiciones de duración
+	AND c."name" = 'Comedy' -- Y género
+;
+
+/* 20. Encuentra las categorías de películas que tienen un promedio de duración superior a 110 minutos y muestra el nombre de la categoría
+junto con el promedio de duración.
+*/
 
 
+	
 
 
 
