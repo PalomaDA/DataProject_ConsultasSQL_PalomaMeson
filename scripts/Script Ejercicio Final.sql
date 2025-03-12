@@ -262,12 +262,26 @@ HAVING COUNT(fa."film_id") > 40
 ;
 
 -- 29. Obtener todas las películas y, si están disponibles en el inventario, mostrar la cantidad disponible.
-SELECT "title", COUNT(i."inventory_id")
+	-- Si quiero que aparezcan todos los nombres de películas, si no existen en inventario la cantidad será 0
+SELECT 
+	"title", 
+	COUNT(i."inventory_id") AS "cantidad_disponible"
 FROM "film" f
-	RIGHT JOIN "inventory" i
+	LEFT JOIN "inventory" i -- Con el LEFT JOIN me aseguro de que estan todas las películas se muestran aunque NO esten en inventario
 	ON f."film_id" = i."film_id"
 GROUP BY "title"
 ;
+
+	-- Si queremos que sólo se muestre el nombre de las peliculas que existen en el inventario 
+SELECT "title", COUNT(i."inventory_id") AS "cantidad_disponible"
+FROM "film" f
+	INNER JOIN "inventory" i 
+	ON f."film_id" = i."film_id"
+GROUP BY "title"
+;
+
+-- 30. Obtener los actores y el número de películas en las que ha actuado.
+
 
 
 
