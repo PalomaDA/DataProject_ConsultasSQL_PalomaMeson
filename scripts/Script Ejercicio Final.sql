@@ -281,6 +281,17 @@ GROUP BY "title"
 ;
 
 -- 30. Obtener los actores y el número de películas en las que ha actuado.
+WITH peliculas_actor AS ( 
+	SELECT "actor_id", COUNT(*) AS "numero_peliculas" -- Creamos una CTE para realizar el conteo de películas por actor
+	FROM "film_actor" fa
+	GROUP BY "actor_id"
+	)
+SELECT  
+	CONCAT(a."first_name", ' ', a."last_name") AS "actor", 
+	pa."numero_peliculas"
+FROM "actor" a
+	JOIN peliculas_actor pa -- Hacemos el JOIN con la tabla actors para poder mostrar los nombres en vez del actor_id
+	ON a."actor_id" = pa."actor_id";
 
 
 
