@@ -163,8 +163,114 @@ WHERE "length" > 180 -- Incluimos las condiciones de duración
 junto con el promedio de duración.
 */
 
+-- Version únicamente con joins
+SELECT "name" AS "categoría", ROUND(AVG("length"), 2) AS "duracion promedio" -- Seleccionamos columnas a mostrar, redondeando el promedio para mayor legibilidad
+FROM "category" c
+	JOIN "film_category" fm -- Unimos a tabla intermedia
+	ON c."category_id" = fm."category_id"
+	JOIN "film" f -- Unimos a tabla que ques permite calcular el promedio de duración
+	ON fm."film_id" = f."film_id" 
+GROUP BY "name" -- Agrupamos por nombre de categoría 
+HAVING AVG("length") > 110 -- E incluimos la condición de duración
+;
 
-	
+-- Version utilicando una CTE (mejor rendimiento el segundo join se realiza después de filtrar los cálculos) *Preferible en BBDD grandes
+WITH promedio_por_categoria AS ( -- Creamos una CTE con id_categoría y promedio ya filtrada
+	SELECT fc."category_id", ROUND(AVG(f."length"),2) AS "promedio_duracion"
+	FROM "film_category" fc
+		JOIN "film" f
+		ON fc."film_id" = f."film_id"
+	GROUP BY fc."category_id"
+	HAVING AVG(f."length") > 110
+	)
+SELECT c."name" AS "categoría", "promedio_duracion"
+FROM "promedio_por_categoria" pc
+JOIN "category" c -- Unimos la CTE a la tabla con los nombres de las categorias
+ON pc."category_id" = c."category_id"
+;
+
+-- 21. ¿Cuál es la media de duración del alquiler de las películas?
+SELECT AVG("rental_duration") AS "media_duracion_alquiler"
+FROM "film"
+;
+
+-- 22. Crea una columna con el nombre y apellidos de todos los actores y actrices.
+SELECT CONCAT("first_name", ' ', "last_name") AS "nombre_completo"
+FROM "actor"
+ORDER BY "nombre_completo" -- Ordenado alfabéticamente de manera ascendente 
+;
+
+-- 23. Números de alquiler por día, ordenados por cantidad de alquiler de forma descendente.
+SELECT COUNT("rental_id"), DATE("rental_date") -- Convertimos a fecha la columna "rental_date" (inicialmente timpestamp)
+FROM "rental"
+GROUP BY DATE("rental_date")
+ORDER BY COUNT("rental_id") DESC -- Ordenamos por numero de alquileres de manera descendiente
+;
+
+-- 24. Encuentra las películas con una duración superior al promedio.
+SELECT "title"
+FROM "film"
+WHERE "length" > (SELECT AVG("length") FROM "film")
+;
+
+	-- Con CTE
+WITH duracion_promedio AS ( -- Primero calculamos la media de duración 
+	SELECT AVG("length") AS "promedio"
+	FROM "film" 
+	)
+SELECT "title"
+FROM "film", duracion_promedio
+WHERE "length" > duracion_promedio."promedio"
+;
+
+-- 25. Averigua el número de alquileres registrados por mes.
+SELECT 
+	EXTRACT(MONTH FROM "rental_date") AS "mes", -- Extraemos el mes de la fecha de alquiler (rental_date)
+	COUNT("rental_id") AS "numero_alquileres" -- Contamos el numero de alquileres
+FROM "rental"
+GROUP BY "mes" -- Agrupado por mes
+ORDER BY "mes" -- Y ordenado por mes de manera ascendente
+;
+
+-- 26. Encuentra el promedio, la desviación estándar y varianza del total pagado.
+SELECT 
+	-- Redondeamos a 2 decimales para una mejro legibilidad
+	ROUND(AVG("amount"), 2) AS "media",
+	ROUND(STDDEV("amount"), 2) AS "desviacion", 
+	ROUND(VARIANCE("amount"), 2) AS "varianza"
+FROM "payment"
+;
+
+-- 27. ¿Qué películas se alquilan por encima del precio medio?
+	-- Calculamos el precio medio con una CTE
+WITH precio_medio AS (
+	SELECT AVG("rental_rate") AS "promedio_alquiler"
+	FROM "film"
+	)
+SELECT "title", "rental_rate"
+FROM "film", "precio_medio"
+WHERE "rental_rate" > precio_medio."promedio_alquiler"
+;
+
+-- 28. Muestra el id de los actores que hayan participado en más de 40 películas.
+SELECT fa."actor_id" AS "id_actor", COUNT(fa."film_id")
+FROM "film_actor" fa
+	JOIN "film" f 
+	ON fa."film_id" = f."film_id"
+GROUP BY fa."actor_id"
+HAVING COUNT(fa."film_id") > 40
+;
+
+-- 29. Obtener todas las películas y, si están disponibles en el inventario, mostrar la cantidad disponible.
+SELECT "title", COUNT(i."inventory_id")
+FROM "film" f
+	RIGHT JOIN "inventory" i
+	ON f."film_id" = i."film_id"
+GROUP BY "title"
+;
+
+
+
 
 
 
