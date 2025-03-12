@@ -293,7 +293,30 @@ FROM "actor" a
 	JOIN peliculas_actor pa -- Hacemos el JOIN con la tabla actors para poder mostrar los nombres en vez del actor_id
 	ON a."actor_id" = pa."actor_id";
 
+-- 31. Obtener todas las películas y mostrar los actores que han actuado en ellas, incluso si algunas películas no tienen actores asociados.
+	-- Solo 
+SELECT 
+    f."title",
+    CONCAT(a."first_name", ' ', a."last_name") AS "nombre_actor"
+FROM "film" f
+	LEFT JOIN "film_actor" fa  -- LEFT JOIN para que se muestren TODAS las películas
+	ON f."film_id" = fa."film_id"
+	LEFT JOIN "actor" a 
+	ON fa."actor_id" = a."actor_id"
+ORDER BY a."first_name" NULLS FIRST; -- Nos permite mostrar las peliculas sin actores asociados al principio para confirmar
 
+-- 32. Obtener todos los actores y mostrar las películas en las que han actuado, incluso si algunos actores no han actuado en ninguna película.
+SELECT 
+	CONCAT(a."first_name", ' ', a."last_name") AS "nombre_actor",
+	f."title"
+FROM "actor" a
+	LEFT JOIN "film_actor" fa  -- LEFT JOIN para que se muestren TODOS los actores
+	ON a."actor_id" = fa."actor_id"
+	LEFT JOIN "film" f
+	ON fa."film_id" = f."film_id"
+ORDER BY f."title" ASC NULLS FIRST; -- Mestra los actores sin película primero para confirmar (en este caso no hay)
+
+-- 
 
 
 
