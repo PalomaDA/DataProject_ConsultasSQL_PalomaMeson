@@ -316,10 +316,98 @@ FROM "actor" a
 	ON fa."film_id" = f."film_id"
 ORDER BY f."title" ASC NULLS FIRST; -- Mestra los actores sin película primero para confirmar (en este caso no hay)
 
--- 
+-- 33. Obtener todas las películas que tenemos y todos los registros de alquiler.
+SELECT f."title", r."rental_id"
+FROM "film" f
+	FULL JOIN "inventory" i -- FULL JOIN para asegurarnos de que entran todos los registros, de todas las tablas
+	ON f."film_id" = i."film_id"
+	FULL JOIN "rental" r
+	ON i."inventory_id" = r."inventory_id"
+ORDER BY f."title" NULLS FIRST
+;
 
+	-- Podemos ver cuantas veces se ha alquilado cada película
+SELECT f."title", COUNT(r."rental_id")
+FROM "film" f
+	FULL JOIN "inventory" i -- FULL JOIN para asegurarnos de que entran todos los registros, de todas las tablas
+	ON f."film_id" = i."film_id"
+	FULL JOIN "rental" r
+	ON i."inventory_id" = r."inventory_id"
+GROUP BY f."title"
+ORDER BY COUNT(r."rental_id") DESC -- Primero las que mas se han alquilado
+;
 
+-- 34. Encuentra los 5 clientes que más dinero se hayan gastado con nosotros.
+SELECT c."customer_id", c."first_name", c."last_name", t."gasto_total"
+FROM "customer" c
+	JOIN (
+	  SELECT "customer_id", SUM("amount") AS "gasto_total"
+	  FROM "payment"
+	  GROUP BY "customer_id"
+	  ORDER BY SUM("amount") DESC
+	  LIMIT 5
+	) t ON c."customer_id" = t."customer_id"
+ORDER BY t."gasto_total" DESC;
 
+-- 35. Selecciona todos los actores cuyo primer nombre es 'Johnny'.
+SELECT *
+FROM "actor"
+WHERE "first_name" = UPPER('Johnny')
+;
+
+-- 36. Renombra la columna “first_name” como Nombre y “last_name” como Apellido.
+ALTER TABLE "actor"  RENAME COLUMN "first_name" TO "Nombre";
+
+ALTER TABLE "actor"  RENAME COLUMN "last_name" TO "Apellido";
+	
+	-- Y comprobamos que se han renombrado correctamente
+SELECT "Nombre", "Apellido"
+FROM "actor"
+;
+
+	-- Volvemos a dejarla como estaba para evitar errores en las queries anteriores
+-- ALTER TABLE "actor"  RENAME COLUMN "Nombre" TO "first_name";
+
+-- ALTER TABLE "actor"  RENAME COLUMN "Apellido" TO "last_name";
+
+-- 37. Encuentra el ID del actor más bajo y más alto en la tabla actor.
+SELECT MIN("actor_id") AS "mas_bajo", MAX("actor_id") AS "mas_alto"
+FROM "actor"
+;
+
+-- 38. Cuenta cuántos actores hay en la tabla “actor” (valdría igual el actor_id máximo)
+SELECT COUNT(*) AS "numero_actores"
+FROM "actor"
+;
+
+-- 39. Selecciona todos los actores y ordénalos por apellido en orden ascendente.
+SELECT *
+FROM "actor"
+ORDER BY "last_name" -- Por defecto, se ordena de manera ascendente
+;
+
+-- 40. Selecciona las primeras 5 películas de la tabla “film”.
+SELECT "film_id", "title"
+FROM "film"
+ORDER BY "film_id"
+LIMIT 5;
+
+-- 41. Agrupa los actores por su nombre y cuenta cuántos actores tienen el mismo nombre. ¿Cuál es el nombre más repetido?
+SELECT "first_name", COUNT("actor_id")
+FROM "actor"
+GROUP BY "first_name"
+ORDER BY COUNT("actor_id") DESC, "first_name"  -- Ordenamos en funcion de los nombres mas repetidos primero y despues alfabeticamente
+;
+
+-- 42. Encuentra todos los alquileres y los nombres de los clientes que los realizaron.
+SELECT 
+	r."rental_id", 
+	CONCAT(c."first_name", ' ', c."last_name") AS "cliente",
+	DATE(r."rental_date")
+FROM "rental" r
+	JOIN "customer" c
+	ON r."customer_id" = c."customer_id"
+;
 
 
 
