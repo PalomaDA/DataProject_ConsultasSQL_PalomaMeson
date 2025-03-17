@@ -409,9 +409,129 @@ FROM "rental" r
 	ON r."customer_id" = c."customer_id"
 ;
 
+-- 43. Muestra todos los clientes y sus alquileres si existen, incluyendo aquellos que no tienen alquileres.
+SELECT 
+	CONCAT(c."first_name", ' ', c."last_name") AS "cliente",
+	r."rental_id"
+FROM "customer" c
+	LEFT JOIN "rental" r
+	ON c."customer_id" = r."customer_id"
+ORDER BY "cliente"
+;
 
+	-- Si además quisiera ver el nombre de las películas que han alquilado en vez del id de alquiler:
+	WITH pelicula_alquilada AS (
+		SELECT "title", "customer_id"
+		FROM "film" f
+			JOIN "inventory" i
+			ON f."film_id" = i."film_id"
+			JOIN "rental" r
+			ON i."inventory_id" = r."inventory_id"
+		)
+	SELECT 
+		CONCAT(c."first_name", ' ', c."last_name") AS "cliente",
+		"title"
+	FROM "customer" c
+		LEFT JOIN pelicula_alquilada pa
+		ON c."customer_id" = pa."customer_id"
+	ORDER BY "cliente"
+	;
+	
 
+-- 44. Realiza un CROSS JOIN entre las tablas film y category. ¿Aporta valor esta consulta? ¿Por qué? Deja después de la consulta la contestación.
+SELECT COUNT(*)
+FROM "film" f
+	CROSS JOIN "film_category" fc
+	CROSS JOIN "category" c
+	/* CROSS JOIN genera todas las combinaciones posibles entre las filas de las tablas, que pueden llegar a tener un enorme peso sin aportar información
+	 	real y útil de cara a hacer un análisis
+	 */
 
+-- 45. Encuentra los actores que han participado en películas de la categoría 'Action'.
+WITH "cat_peliculas" AS (
+	SELECT 	
+		fc."film_id"
+	FROM "film_category" fc
+		JOIN "category" c
+		ON fc."category_id" = c."category_id"
+	WHERE UPPER(c."name") = 'ACTION' -- Para asegurarnos de que todas las peliculas categorizadas como 'Action' se incluyan esten escritas con mayus o minus
+	)
+SELECT 
+	INITCAP(CONCAT(a."first_name", ' ', a."last_name")) AS "actor" -- INITCAP para que el texto este primera con mayus, resto en minus
+FROM "actor" a
+	JOIN "film_actor" fa
+	ON a."actor_id" = fa."actor_id"
+WHERE fa."film_id" IN (SELECT "film_id" FROM "cat_peliculas")
+ORDER BY "actor"
+;
 
+  -- Versión solo con JOINS (más eficiente)
+	SELECT 
+	    INITCAP(CONCAT(a."first_name", ' ', a."last_name")) AS "actor"
+	FROM "actor" a
+		JOIN "film_actor" fa 
+		ON a."actor_id" = fa."actor_id"
+		JOIN "film_category" fc 
+		ON fa."film_id" = fc."film_id"
+		JOIN "category" c 
+		ON fc."category_id" = c."category_id"
+	WHERE UPPER(c."name") = 'ACTION'
+	ORDER BY "actor"
+  ;
+  
+ -- 46. Encuentra todos los actores que no han participado en películas.
+SELECT 
+	INITCAP(CONCAT(a."first_name", ' ', a."last_name")) AS "actor"
+FROM "actor" a
+	LEFT JOIN "film_actor" fa -- Con LEFT JOIN nos aseguramos de que seleccionamos a TODOS los actores
+	ON a."actor_id" = fa."actor_id"
+WHERE fa."film_id" IS NULL -- Y fltramos por aquellos que NO estan asociados a ninguna película (a través de film_id): NO hay actores sin película registardos
+
+-- 47. Selecciona el nombre de los actores y la cantidad de películas en las que han participado.
+SELECT 
+	INITCAP(CONCAT(a."first_name", ' ', a."last_name")) AS "actor",
+	COUNT(fa."film_id") AS "numero_peliculas"
+FROM "actor" a
+	JOIN "film_actor" fa 
+	ON a."actor_id" = fa."actor_id"
+GROUP BY "actor"
+ORDER BY "numero_peliculas" DESC -- ordenamos de manera descendente mostrando primero los actores que han participado en más películas
+;
+
+-- 48. Crea una vista llamada “actor_num_peliculas” que muestre los nombres de los actores y el número de películas en las que han participado.
+CREATE VIEW actor_num_peliculas AS (
+	SELECT 
+		INITCAP(CONCAT(a."first_name", ' ', a."last_name")) AS "actor",
+		COUNT(fa."film_id") AS "numero_peliculas"
+	FROM "actor" a
+		JOIN "film_actor" fa 
+		ON a."actor_id" = fa."actor_id"
+	GROUP BY "actor"
+	)
+;
+
+	-- Comprobamos que se ha creado correctamente
+	SELECT *
+	FROM "actor_num_peliculas"
+	;
+	
+-- 49. Calcula el número total de alquileres realizados por cada cliente.
+EXPLAIN ANALYZE
+WITH alquileres_cliente AS (
+	SELECT "customer_id", COUNT("rental_id") AS "total_alquileres"
+	FROM "rental"
+	GROUP BY "customer_id"
+	)
+SELECT 
+	INITCAP(CONCAT(c."first_name", ' ', c."last_name")) AS "cliente",
+	"total_alquileres"
+FROM "alquileres_cliente" ac
+	JOIN "customer" c
+	ON ac."customer_id" = c."customer_id"
+;
+
+-- 50. Calcula la duración total de las películas en la categoría 'Action'.
+
+	
 
 
