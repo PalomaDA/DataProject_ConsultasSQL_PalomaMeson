@@ -516,7 +516,6 @@ CREATE VIEW actor_num_peliculas AS (
 	;
 	
 -- 49. Calcula el número total de alquileres realizados por cada cliente.
-EXPLAIN ANALYZE
 WITH alquileres_cliente AS (
 	SELECT "customer_id", COUNT("rental_id") AS "total_alquileres"
 	FROM "rental"
@@ -531,7 +530,35 @@ FROM "alquileres_cliente" ac
 ;
 
 -- 50. Calcula la duración total de las películas en la categoría 'Action'.
+WITH cat_peliculas AS (
+	SELECT "film_id"
+	FROM "film_category"
+	WHERE "category_id" IN (
+		SELECT "category_id"
+		FROM "category"
+		WHERE UPPER("name") = 'ACTION'
+		)
+	)
+SELECT SUM("length") AS "duracion_total_accion"
+FROM "film" f
+	JOIN cat_peliculas ca
+	ON f."film_id" = ca."film_id"
+;
 
+-- 51. Crea una tabla temporal llamada “cliente_rentas_temporal” para almacenar el total de alquileres por cliente.
+CREATE TEMPORARY TABLE cliente_rentas_temporal AS (
+    SELECT 
+        INITCAP(CONCAT(c."first_name", ' ', c."last_name")) AS "cliente",
+        COUNT(r."rental_id") AS "total_alquileres"
+    FROM "customer" c
+    LEFT JOIN "rental" r ON c."customer_id" = r."customer_id"
+    GROUP BY c."customer_id", c."first_name", c."last_name"
+);
+
+
+	-- Verificar que la tabla temporal se ha creado correctamente
+	SELECT * FROM cliente_rentas_temporal
+	ORDER BY "total_alquileres" DESC;
 	
 
 
