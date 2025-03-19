@@ -560,5 +560,69 @@ CREATE TEMPORARY TABLE cliente_rentas_temporal AS (
 	SELECT * FROM cliente_rentas_temporal
 	ORDER BY "total_alquileres" DESC;
 	
+-- 52. Crea una tabla temporal llamada “peliculas_alquiladas” que almacene las películas que han sido alquiladas al menos 10 veces.
+CREATE TEMPORARY TABLE peliculas_alquiladas AS (
+	SELECT 
+		INITCAP(f."title") AS "pelicula",
+		COUNT(r."rental_id") AS "veces_alquilada"
+	FROM "film" f
+		JOIN "inventory" i
+		ON f."film_id" = i."film_id"
+		JOIN "rental" r
+		ON i."inventory_id" = r."inventory_id"
+	GROUP BY f."film_id"
+	HAVING COUNT(r."rental_id") >= 10 -- Aqui indicamos que solo sean las alquiladas al menos 10 veces (10 incluido)
+	)
+;
+
+	-- Verificamos que se ha creado correctamente
+	SELECT *
+	FROM "peliculas_alquiladas"
+	;
+	
+/* 53. Encuentra el título de las películas que han sido alquiladas por el cliente con el nombre ‘Tammy Sanders’ y que aún no se han devuelto. 
+ * Ordena los resultados alfabéticamente por título de película.
+*/
+WITH tammy_unreturned AS ( -- Construimos una CTE los alquileres realizados por Tammy NO devueltos
+	SELECT *
+	FROM "rental" r
+	WHERE
+		r."customer_id" IN (
+		SELECT "customer_id"
+		FROM "customer" c
+		WHERE INITCAP(CONCAT(c."first_name", ' ', c."last_name")) = 'Tammy Sanders'
+		)
+		AND r."return_date" IS NULL -- Con esta condicion aseguramos que tenemos los alquileres SIN fecha de devolucion (por tanto, no devueltos)
+		)
+SELECT f."title"
+FROM "film" f
+	JOIN "inventory" i
+	ON f."film_id" = i."film_id"
+	JOIN "tammy_unreturned" tu
+	ON i."inventory_id" = tu."inventory_id"
+ORDER BY f."title" -- Ordenamos por título de película
+;
+
+/* 54. Encuentra los nombres de los actores que han actuado en al menos una película que pertenece a la categoría ‘Sci-Fi’. Ordena los resultados
+ * alfabéticamente por apellido.*/
 
 
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
