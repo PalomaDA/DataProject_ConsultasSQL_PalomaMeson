@@ -604,7 +604,56 @@ ORDER BY f."title" -- Ordenamos por título de película
 ;
 
 /* 54. Encuentra los nombres de los actores que han actuado en al menos una película que pertenece a la categoría ‘Sci-Fi’. Ordena los resultados
- * alfabéticamente por apellido.*/
+ * alfabéticamente por apellido.
+ */
+WITH "film_scify" AS ( -- CTE para encontrar las películas de la cateogría sci-cy
+	SELECT "film_id"
+	FROM "film_category" fc
+	WHERE "category_id" IN (SELECT "category_id" FROM "category" WHERE UPPER("name") = 'SCI-FI')
+	)
+SELECT DISTINCT -- Que cada actor aparezca solo una vez
+	INITCAP(CONCAT("first_name", ' ', "last_name")) AS "actor"
+FROM "actor" a
+WHERE "actor_id" IN (
+	SELECT "actor_id"
+	FROM "film_actor"
+	WHERE "film_id" IN (SELECT "film_id" FROM "film_scify"))
+ORDER BY "actor"
+;
+
+/* 55. Encuentra el nombre y apellido de los actores que han actuado en películas que se alquilaron después de que la película ‘Spartacus
+Cheaper’ se alquilara por primera vez. Ordena los resultados alfabéticamente por apellido.
+*/
+-- Creamos una tabla temporal con los joins que vamos a necesitar varas veces
+CREATE TEMPORARY TABLE fecha_alquiler_pelicula AS (
+	SELECT "rental_date", f."title", f."film_id"
+	FROM "rental" r
+		JOIN "inventory" i
+		ON r."inventory_id" = i."inventory_id"
+		JOIN "film" f
+		ON i."film_id" = f."film_id");
+
+WITH "primer_alquiler_spartacus" AS (
+	SELECT "rental_date"
+	FROM "fecha_alquiler_pelicula"
+	WHERE INITCAP("title") = 'Spartacus Cheaper'
+	ORDER BY "rental_date" 
+	LIMIT 1
+	),
+"peliculas_alquiladas_despues" AS (
+	SELECT "film_id"
+	FROM "fecha_alquiler_pelicula"
+	WHERE "rental_date" > (SELECT "rental_date" FROM "primer_alquiler_spartacus"))
+SELECT DISTINCT
+	a."first_name", a."last_name"
+FROM "actor" a
+	JOIN "film_actor" fa
+	ON a."actor_id" = fa."actor_id"
+WHERE fa."film_id" IN (SELECT "film_id" FROM "peliculas_alquiladas_despues")
+ORDER BY a."last_name" -- Ordenamos por apellido
+;
+
+-- 56. Encuentra el nombre y apellido de los actores que no han actuado en ninguna película de la categoría ‘Music’.
 
 
 
