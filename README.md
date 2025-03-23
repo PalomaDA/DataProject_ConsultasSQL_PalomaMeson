@@ -1,37 +1,51 @@
-# DataProject: Lógica. Consultas de SQL
+# Proyecto SQL – Lógica de Consultas
 
-## Introducción
+Este proyecto forma parte del módulo de SQL del Master en Ciencia de Datos impartido por Hack(io) - thePower y tiene como objetivo resolver una serie de ejercicios utilizando consultas SQL aplicadas a una base de datos relacional.
 
-Este documento recoge los pasos seguidos durante el desarrollo del proyecto, así como el informe final del análisis realizado. A medida que se avance en el proyecto, este README se actualizará con la información más relevante y detallada.
+## Estructura del repositorio
 
-## Objetivos del Proyecto
+- `README.md`: documento actual que resume el proceso y contiene este informe.
+- `data/`: Contiene el diagrama proporcionado con la estructura de la base de datos y el PDF con los enunciados.
+- `scripts/`: Contiene el script todas las consultas resueltas, numeradas y comentadas con su enunciado.
 
-1. Definir el problema y los objetivos del análisis.
-2. Recopilar y preparar los datos necesarios.
-3. Realizar el análisis exploratorio de datos.
-4. Aplicar técnicas de modelado y análisis.
-5. Interpretar y documentar los resultados.
+---
 
-## Estructura del Proyecto
+## Objetivos del proyecto
 
-- `data/`: Contiene los datos utilizados en el análisis.
-- `scripts/`: Contiene los scripts de código utilizados para el análisis.
+- Practicar operaciones fundamentales en SQL: `SELECT`, `JOIN`, `GROUP BY`, `HAVING`, subconsultas, funciones agregadas, etc.
+- Aprender a estructurar consultas complejas usando CTEs y tablas temporales.
+- Generar informes claros sobre los datos consultados.
+- Aplicar buenas prácticas de legibilidad, eficiencia y optimización.
 
-## Pasos Seguidos
+---
 
-### 1. Estructuración del Proyecto
+## Enfoque seguido
 
-Describe el problema que se intenta resolver y los objetivos específicos del análisis.
+1. Se analizó el **PDF del enunciado** con todos los ejercicios propuestos.
+2. Se creó un archivo `.sql` con **cada consulta identificada por su número y enunciado**.
+3. Se verificaron y probaron todas las consultas en una base de datos PostgreSQL.
+4. Se optimizaron algunas consultas utilizando:
+   - `CTEs` (`WITH`) para claridad en operaciones complejas
+   - `JOINs` en lugar de subconsultas cuando mejoraban la eficiencia
+   - Funciones como `INITCAP`, `CONCAT`, `COUNT(DISTINCT)` y `SUM` según el caso
+5. Se validó que los resultados fueran coherentes con el esquema de la base de datos.
 
-### 2. Interpretación de Resultados
+---
 
-- Interpretar los resultados obtenidos del análisis.
-- Incluir conclusiones y recomendaciones basadas en los hallazgos.
+## Análisis y aprendizajes
 
-## Informe Final
+Durante el desarrollo del proyecto se abordaron diversos conceptos clave de SQL, aplicados a un conjunto amplio de consultas sobre una base de datos relacional. Entre los aprendizajes más destacados se encuentran:
 
-El informe final se incluirá en esta sección una vez completado el análisis.
+- Comprensión clara de las diferencias entre los distintos tipos de `JOIN` (`INNER JOIN`, `LEFT JOIN`, `RIGHT JOIN`, `CROSS JOIN`) y su aplicación según el contexto de los datos y los resultados esperados.
+- Identificación de los casos en los que resulta más adecuado utilizar subconsultas, expresiones de tabla común (`CTEs`) o tablas temporales, dependiendo de la complejidad de la consulta y la necesidad de reutilización o estructuración por pasos.
+- Uso correcto de funciones de agregación como `SUM`, `COUNT`, `AVG`, entre otras, en combinación con cláusulas `GROUP BY` y `HAVING` para realizar cálculos por agrupaciones de datos.
+- Mejora en la estructuración y legibilidad de consultas, separando lógicamente cada parte del proceso, facilitando su mantenimiento y comprensión.
+- Aplicación eficiente de filtros mediante la cláusula `WHERE`, optimizando el enfoque de las consultas para obtener resultados más específicos y relevantes.
 
-## Contacto
+---
 
-Para cualquier duda o sugerencia, puedes contactar con Paloma a través del correo electrónico: pmeson.da@gmail.com.
+## Autoría
+
+Proyecto realizado por: **Paloma Mesón de Arana** 
+E-mail de contacto: pmeson.da@gmail.com.
+Repositorio desarrollado como parte del curso de SQL (DataProject: Lógica Consultas SQL).
