@@ -654,16 +654,123 @@ ORDER BY a."last_name" -- Ordenamos por apellido
 ;
 
 -- 56. Encuentra el nombre y apellido de los actores que no han actuado en ninguna película de la categoría ‘Music’.
+WITH musicales AS (
+	SELECT "film_id"
+	FROM "film_category" fc
+	JOIN "category" c
+	ON fc."category_id" = c."category_id"
+	WHERE UPPER(c."name") = 'MUSIC')
+SELECT DISTINCT
+	INITCAP("first_name"), 
+	INITCAP("last_name")
+FROM "actor" a
+	JOIN "film_actor" fa
+	ON a."actor_id" = fa."actor_id"
+WHERE fa."film_id" NOT IN (SELECT "film_id" FROM musicales)
+;
+
+-- Encuentra el título de todas las películas que fueron alquiladas por más de 8 días.
+WITH mas_ocho_dias AS ( -- Identificamos las películas alquiladas por mas de 8 días
+	SELECT "film_id"
+	FROM "inventory" i
+		JOIN "rental" r
+		ON i."inventory_id" = r."inventory_id"
+	WHERE DATE(r."return_date") - DATE(r."rental_date") > 8 -- condicion donde la diferenca entre fecha de devolucion y fecha de alquiler es > 8
+	)
+SELECT DISTINCT INITCAP("title")
+FROM "film"
+WHERE "film_id" IN (SELECT "film_id" FROM "mas_ocho_dias");
+
+-- Encuentra el título de todas las películas que son de la misma categoría que ‘Animation’.
+SELECT DISTINCT INITCAP(f."title")
+FROM "film" f
+	JOIN "film_category" fc
+	ON f."film_id" = fc."film_id"
+	JOIN "category" c
+	ON  fc."category_id" = c."category_id"
+WHERE UPPER(c."name") = 'ANIMATION'
+;
+
+/* 59. Encuentra los nombres de las películas que tienen la misma duración que la película con el título ‘Dancing Fever’. Ordena los resultados
+alfabéticamente por título de película. */
+SELECT DISTINCT INITCAP("title")
+FROM "film"
+WHERE "length" = (SELECT "length"
+					FROM "film"
+					WHERE INITCAP("title") = 'Dancing Fever')
+ORDER BY "title";
+	
+/* 60. Encuentra los nombres de los clientes que han alquilado al menos 7 películas distintas. 
+ * Ordena los resultados alfabéticamente por apellido.
+*/	
+SELECT INITCAP(CONCAT(c."first_name", ' ', "last_name")), COUNT(DISTINCT "film_id")
+FROM "customer" c
+	JOIN "rental" r
+	ON c."customer_id" = r."customer_id"
+	JOIN "inventory" i
+	ON r."inventory_id" = i."inventory_id"
+GROUP BY c."customer_id"
+HAVING COUNT(DISTINCT "film_id") >= 7
+;
+
+/* 61. Encuentra la cantidad total de películas alquiladas por categoría y
+muestra el nombre de la categoría junto con el recuento de alquileres. 
+*/
+WITH conteo_alquiler AS ( -- Identificamos cuantas veces se ha alquilado cada película (una misma película se puede haber alquilado varias veces)
+	SELECT i."film_id", COUNT(r."rental_id") AS "alquileres_pelicula" 
+	FROM "inventory" i
+		JOIN "rental" r
+		ON i."inventory_id" = r."inventory_id"
+	GROUP BY i."film_id"
+	)
+SELECT c."name", SUM("alquileres_pelicula") AS "total_alquileres" -- Hacemos la suma de alquileres por categoría total
+FROM "category" c
+	 JOIN "film_category" fc
+	 ON c."category_id" = fc."category_id"
+	 JOIN "conteo_alquiler" ca
+	 ON fc."film_id" = ca."film_id"
+GROUP BY c."name"
+;
+
+--62. Encuentra el número de películas por categoría estrenadas en 2006.
+SELECT 
+	c."name", 
+	COUNT(f."film_id") AS "numero_peliculas"
+FROM "film" f
+	JOIN "film_category" fc
+	ON f."film_id" = fc."film_id"
+	JOIN "category" c
+	ON fc."category_id" = c."category_id"
+WHERE f."release_year" = 2006
+GROUP BY c."name"
+;
+
+--63. Obtén todas las combinaciones posibles de trabajadores con las tiendas que tenemos.
+SELECT   
+	CONCAT(s."first_name", ' ', s."last_name") AS "empleado",
+ 	st."store_id"
+FROM "staff" s
+	CROSS JOIN "store" st -- CROSS JOIN ofrece todas las posibles combinaciones
+ORDER BY "empleado"
+
+/*64. Encuentra la cantidad total de películas alquiladas por cada cliente y muestra el ID del cliente, su nombre y apellido junto con la cantidad de
+películas alquiladas.
+ */
+SELECT 
+	c."customer_id" AS "num_id",
+	INITCAP(CONCAT(c."first_name", ' ', c."last_name")) AS "cliente",
+	COUNT(r."rental_id") AS "peliculas_alquiladas"
+FROM "customer" c
+	JOIN "rental" r
+	ON c."customer_id" = r."customer_id"
+GROUP BY c."customer_id", "cliente"
+ORDER BY c."customer_id"
+;
 
 
 
 
-	
-	
-	
-	
-	
-	
+
 	
 	
 	
