@@ -7,7 +7,7 @@ Este proyecto forma parte del módulo de SQL del Master en Ciencia de Datos impa
 - `README.md`: documento actual que resume el proceso y contiene este informe.
 - `data/`: Contiene el diagrama proporcionado con la estructura de la base de datos y el PDF con los enunciados.
 - `scripts/`: Contiene el script todas las consultas resueltas, numeradas y comentadas con su enunciado.
-   - (13/04/25) Se incluye un scrips adicional con las correcciones del ejercicio.
+   - (13/04/25) Se incluye un script adicional con las correcciones del ejercicio.
 
 ---
 
