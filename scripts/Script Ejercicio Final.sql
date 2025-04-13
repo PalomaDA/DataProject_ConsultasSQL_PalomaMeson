@@ -38,7 +38,7 @@ ORDER BY "length" -- Por defecto se ordena de manera ascendente (ASC)
 -- 6. Encuentra el nombre y apellido de los actores que tengan ‘Allen’ en su apellido.
 SELECT "first_name", "last_name"
 FROM "actor"
-WHERE "last_name" = 'ALLEN'
+WHERE UPPER("last_name") = 'ALLEN'
 ;
 
 -- 7. Encuentra la cantidad total de películas en cada clasificación de la tabla “film” y muestra la clasificación junto con el recuento.
@@ -253,12 +253,10 @@ WHERE "rental_rate" > precio_medio."promedio_alquiler"
 ;
 
 -- 28. Muestra el id de los actores que hayan participado en más de 40 películas.
-SELECT fa."actor_id" AS "id_actor", COUNT(fa."film_id")
-FROM "film_actor" fa
-	JOIN "film" f 
-	ON fa."film_id" = f."film_id"
-GROUP BY fa."actor_id"
-HAVING COUNT(fa."film_id") > 40
+SELECT "actor_id" AS "id_actor", COUNT("film_id")
+FROM "film_actor"
+GROUP BY "actor_id"
+HAVING COUNT("film_id") > 40
 ;
 
 -- 29. Obtener todas las películas y, si están disponibles en el inventario, mostrar la cantidad disponible.
@@ -352,7 +350,7 @@ ORDER BY t."gasto_total" DESC;
 -- 35. Selecciona todos los actores cuyo primer nombre es 'Johnny'.
 SELECT *
 FROM "actor"
-WHERE "first_name" = UPPER('Johnny')
+WHERE UPPER("first_name") = 'JOHNNY'
 ;
 
 -- 36. Renombra la columna “first_name” como Nombre y “last_name” como Apellido.
@@ -494,7 +492,7 @@ SELECT
 FROM "actor" a
 	JOIN "film_actor" fa 
 	ON a."actor_id" = fa."actor_id"
-GROUP BY "actor"
+GROUP BY a."actor_id"
 ORDER BY "numero_peliculas" DESC -- ordenamos de manera descendente mostrando primero los actores que han participado en más películas
 ;
 
@@ -506,7 +504,7 @@ CREATE VIEW actor_num_peliculas AS (
 	FROM "actor" a
 		JOIN "film_actor" fa 
 		ON a."actor_id" = fa."actor_id"
-	GROUP BY "actor"
+	GROUP BY a."actor_id"
 	)
 ;
 
@@ -655,21 +653,23 @@ ORDER BY a."last_name" -- Ordenamos por apellido
 
 -- 56. Encuentra el nombre y apellido de los actores que no han actuado en ninguna película de la categoría ‘Music’.
 WITH musicales AS (
-	SELECT "film_id"
-	FROM "film_category" fc
-	JOIN "category" c
-	ON fc."category_id" = c."category_id"
-	WHERE UPPER(c."name") = 'MUSIC')
+	-- Encontramos los actores que han trabajado alguna vez en un musical
+	SELECT DISTINCT fa."actor_id"
+	FROM "film_actor" fa
+		JOIN "film_category" fc 
+		ON fa."film_id" = fc."film_id"
+		JOIN "category" c 
+		ON fc."category_id" = c."category_id"
+	WHERE UPPER(c."name") = 'MUSIC'
+	)
 SELECT DISTINCT
-	INITCAP("first_name"), 
-	INITCAP("last_name")
+	INITCAP(a."first_name") AS "nombre", 
+	INITCAP(a."last_name") AS "apellido"
 FROM "actor" a
-	JOIN "film_actor" fa
-	ON a."actor_id" = fa."actor_id"
-WHERE fa."film_id" NOT IN (SELECT "film_id" FROM musicales)
-;
+WHERE a."actor_id" NOT IN (SELECT "actor_id" FROM musicales);
 
--- Encuentra el título de todas las películas que fueron alquiladas por más de 8 días.
+
+-- 57. Encuentra el título de todas las películas que fueron alquiladas por más de 8 días.
 WITH mas_ocho_dias AS ( -- Identificamos las películas alquiladas por mas de 8 días
 	SELECT "film_id"
 	FROM "inventory" i
@@ -681,7 +681,7 @@ SELECT DISTINCT INITCAP("title")
 FROM "film"
 WHERE "film_id" IN (SELECT "film_id" FROM "mas_ocho_dias");
 
--- Encuentra el título de todas las películas que son de la misma categoría que ‘Animation’.
+-- 58. Encuentra el título de todas las películas que son de la misma categoría que ‘Animation’.
 SELECT DISTINCT INITCAP(f."title")
 FROM "film" f
 	JOIN "film_category" fc
@@ -709,7 +709,7 @@ FROM "customer" c
 	ON c."customer_id" = r."customer_id"
 	JOIN "inventory" i
 	ON r."inventory_id" = i."inventory_id"
-GROUP BY c."customer_id"
+GROUP BY c."first_name", c."last_name"
 HAVING COUNT(DISTINCT "film_id") >= 7
 ;
 
@@ -763,7 +763,7 @@ SELECT
 FROM "customer" c
 	JOIN "rental" r
 	ON c."customer_id" = r."customer_id"
-GROUP BY c."customer_id", "cliente"
+GROUP BY c."customer_id", c."first_name", c."last_name"
 ORDER BY c."customer_id"
 ;
 
