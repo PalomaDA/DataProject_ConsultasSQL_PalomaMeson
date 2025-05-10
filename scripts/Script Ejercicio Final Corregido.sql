@@ -703,14 +703,15 @@ ORDER BY "title";
 /* 60. Encuentra los nombres de los clientes que han alquilado al menos 7 películas distintas. 
  * Ordena los resultados alfabéticamente por apellido.
 */	
-SELECT INITCAP(CONCAT(c."first_name", ' ', "last_name")), COUNT(DISTINCT "film_id")
+SELECT INITCAP(CONCAT(c."first_name", ' ', c."last_name")), COUNT(DISTINCT "film_id")
 FROM "customer" c
 	JOIN "rental" r
 	ON c."customer_id" = r."customer_id"
 	JOIN "inventory" i
 	ON r."inventory_id" = i."inventory_id"
-GROUP BY c."first_name", c."last_name"
+GROUP BY  c."customer_id"
 HAVING COUNT(DISTINCT "film_id") >= 7
+ORDER BY c."last_name"
 ;
 
 /* 61. Encuentra la cantidad total de películas alquiladas por categoría y
